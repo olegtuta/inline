@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body style="display: flex; flex-direction:column; justify-content: center; align-items: center">
+<p id="error" class="mt-4" style="color: firebrick; visibility: hidden">Минимум 3 символа!</p><br>
+<form class="d-flex mt-4" role="search" style="width: 40%">
+    <input id="search" min="3" class="form-control me-2" type="search" placeholder="Введите что-нибудь..."
+           aria-label="Search">
+</form>
+<div id="content" class="mt-4" style="width: 40%">
+
+</div>
+
+<script>
+    document.getElementById("search").addEventListener("input", function () {
+        if (document.getElementById("search").value.length < 3) {
+            document.getElementById("error").style.visibility = "visible";
+            document.getElementById("content").innerHTML = "";
+        } else {
+            document.getElementById("error").style.visibility = "hidden";
+            let value = document.getElementById("search").value;
+            let template = `<div class="card mt-2" style="width: 100%;"><div class="card-body"><h5 class="card-title"><b>ЗАГОЛОВОК ПОСТА: </b>TITLE</h5><h6 class="card-subtitle mb-2 text-muted">SUB</h6><p class="card-text"><b>ТЕКСТ КОММЕНТА К ПОСТУ: </b>TEXT</p></div></div>`;
+            axios.get(`/?search=${value}`)
+                .then(response => {
+                    if (response.data.length > 0) {
+                        let allHtml = "";
+                        response.data.forEach(item => {
+                            let body = item.body.split(value.trim()).join("<b style='color:green'>" + value.trim() + "</b>")
+                            let newTemplate = template.split("TITLE").join(item.title).split("TEXT").join(body).split("SUB").join("айди поста - "+item.post_id+" | айди коммента - "+item.comment_id);
+                            allHtml += newTemplate;
+                        });
+                        document.getElementById("content").innerHTML = allHtml;
+                    } else {
+                        document.getElementById("content").innerHTML = "<b>НИЧЕГО НЕ НАЙДЕНО</b>";
+                    }
+                });
+        }
+    });
+</script>
+</body>
+</html>
